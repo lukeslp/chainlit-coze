@@ -54,6 +54,8 @@ async def coze_chat(message: cl.Message):
 
     # If the response is successful, process and display it
     if response.status_code == 200:
+        # Initialize an empty string to accumulate message content
+        coze_message = ""
         # Parse the streaming response
         for line in response.iter_lines():
             if line:
@@ -62,13 +64,17 @@ async def coze_chat(message: cl.Message):
                     message_data = decoded_line.split('data:', 1)[1].strip()
                     message_json = json.loads(message_data)
                     if message_json.get('event') == 'message':
-                        # Extract the message content and update the chat history
-                        coze_message = message_json['message']['content']
-                        chat_history.append(message_json['message'])
-                        cl.user_session.set('chat_history', chat_history)
-                        # Send the message to the UI
-                        await cl.Message(content=coze_message).send()
+                        # Accumulate the message content
+                        coze_message += message_json['message']['content']
+                        if message_json.get('is_finish', False):
+                            # If the message is complete, update the chat history and send the message to the UI
+                            chat_history.append(
+                                {"role": "assistant", "content": coze_message, "content_type": "text"})
+                            cl.user_session.set('chat_history', chat_history)
+                            await cl.Message(content=coze_message).send()
+                            coze_message = ""  # Reset the accumulator for the next message
                     elif message_json.get('event') == 'done':
+                        # If the 'done' event is received, break the loop
                         break
     else:
         # If there's an error, log it and send an error message to the UI
