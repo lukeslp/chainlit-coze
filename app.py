@@ -64,8 +64,10 @@ async def coze_chat(message: cl.Message):
                     message_data = decoded_line.split('data:', 1)[1].strip()
                     message_json = json.loads(message_data)
                     if message_json.get('event') == 'message':
-                        # Accumulate the message content
-                        coze_message += message_json['message']['content']
+                        # Check if the message is of type 'answer' and accumulate the content
+                        if message_json['message']['type'] == 'answer':
+                            coze_message += message_json['message']['content']
+                        # Check if the message is finished
                         if message_json.get('is_finish', False):
                             # If the message is complete, update the chat history and send the message to the UI
                             chat_history.append(
