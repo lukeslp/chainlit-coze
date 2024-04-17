@@ -20,8 +20,6 @@ headers = {
     'Content-Type': 'application/json'
 }
 
-print("Environment variables loaded and headers set.")
-
 # Function called at the start of the chat, setting up chat settings
 
 
@@ -29,20 +27,17 @@ print("Environment variables loaded and headers set.")
 async def start():
     # Initialize the user session with default values
     cl.user_session.set('chat_history', [])
-    print("Chat started: User session initialized with default chat history.")
 
 # Function to handle incoming messages from the user
 
 
 @cl.on_message
 async def coze_chat(message: cl.Message):
-    print(f"Received message from user: {message.content}")
 
     # Step 1: Retrieve the current chat history
     @cl.step
     def retrieve_chat_history():
         chat_history = cl.user_session.get('chat_history', [])
-        print("Current chat history retrieved.")
         return chat_history
 
     chat_history = retrieve_chat_history()
@@ -52,7 +47,6 @@ async def coze_chat(message: cl.Message):
     def append_user_message(chat_history, message):
         chat_history.append(
             {"role": "user", "content": message.content, "content_type": "text"})
-        print("User's message appended to chat history.")
         return chat_history
 
     chat_history = append_user_message(chat_history, message)
@@ -67,7 +61,6 @@ async def coze_chat(message: cl.Message):
             'chat_history': chat_history,
             'stream': True  # Assuming we want to use streaming responses
         }
-        print("Data payload for Coze API request created.")
         return data
 
     data = create_data_payload(chat_history)
@@ -77,25 +70,21 @@ async def coze_chat(message: cl.Message):
     def make_api_request(data):
         response = requests.post(
             COZE_API_ENDPOINT, headers=headers, json=data, stream=True)
-        print(f"Post request made to Coze API")
         return response
 
     response = make_api_request(data)
 
     # If the response is successful, process and display it
     if response.status_code == 200:
-        print("Response from Coze API successful. Processing...")
 
         # Step 5: Handle streaming response
         @cl.step
         async def stream_step():
-            print("Streaming step initiated.")
             # Initialize an empty string to accumulate message content
             coze_message = ""
             # Create a Chainlit Message object for streaming
             stream_message = cl.Message(content="")
             await stream_message.send()
-            print("Initial empty message sent for streaming.")
             # Parse the streaming response
             for line in response.iter_lines():
                 if line:
@@ -104,7 +93,6 @@ async def coze_chat(message: cl.Message):
                         message_data = decoded_line.split('data:', 1)[
                             1].strip()
                         message_json = json.loads(message_data)
-                        print(f"Received streaming data: {message_json}")
                         if message_json.get('event') == 'message':
                             # Check if the message is of type 'answer' and accumulate the content
                             if message_json['message']['type'] == 'answer':
@@ -112,7 +100,6 @@ async def coze_chat(message: cl.Message):
                                 # Update the content of the stream_message
                                 stream_message.content = coze_message
                                 await stream_message.update()
-                                print("Stream message updated.")
                             # Check if the message is finished
                             if message_json.get('is_finish', False):
                                 # If the message is complete, update the chat history
@@ -120,8 +107,6 @@ async def coze_chat(message: cl.Message):
                                     {"role": "assistant", "content": coze_message, "content_type": "text"})
                                 cl.user_session.set(
                                     'chat_history', chat_history)
-                                print(
-                                    "Chat history updated with assistant's message.")
                         elif message_json.get('event') == 'error':
                             # If an error event is received, check if it's a token quota error
                             error_info = message_json.get(
@@ -130,22 +115,18 @@ async def coze_chat(message: cl.Message):
                                 # If it's a token quota error, send an appropriate message to the UI
                                 quota_error_message = "Sorry, the token quota has been used up. Please check your balance or contact Coze support for assistance."
                                 await cl.Message(content=quota_error_message).send()
-                                print("Token quota error message sent to UI.")
                             break
                         elif message_json.get('event') == 'done':
                             # If the 'done' event is received, break the loop
-                            print("Streaming done event received. Breaking loop.")
                             break
 
         # Call the streaming step
         await stream_step()
     else:
-        # If there's an error, log it and send an error message to the UI
+        # If there's an error, send an error message to the UI
         error_message = f"An error occurred: {response.status_code}"
-        print(error_message)
         await cl.Message(content=error_message).send()
 
 # Run the chatbot application
 if __name__ == '__main__':
-    print("Starting chatbot application...")
     cl.run()
