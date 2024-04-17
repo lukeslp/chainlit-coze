@@ -97,7 +97,7 @@ async def coze_chat(message: cl.Message):
                             # Check if the message is of type 'answer' and accumulate the content
                             if message_json['message']['type'] == 'answer':
                                 coze_message += message_json['message']['content']
-                                # Update the content of the stream_message
+                                # Update the content of the stream_messagexq
                                 stream_message.content = coze_message
                                 await stream_message.update()
                             # Check if the message is finished
