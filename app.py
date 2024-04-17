@@ -60,6 +60,9 @@ async def coze_chat(message: cl.Message):
         async def stream_step():
             # Initialize an empty string to accumulate message content
             coze_message = ""
+            # Create a Chainlit Message object for streaming
+            stream_message = cl.Message(content="")
+            await stream_message.send()
             # Parse the streaming response
             for line in response.iter_lines():
                 if line:
@@ -72,8 +75,9 @@ async def coze_chat(message: cl.Message):
                             # Check if the message is of type 'answer' and accumulate the content
                             if message_json['message']['type'] == 'answer':
                                 coze_message += message_json['message']['content']
-                                # Stream the partial message to the UI
-                                await cl.Message(content=coze_message).send()
+                                # Update the content of the stream_message
+                                stream_message.content = coze_message
+                                await stream_message.update()
                             # Check if the message is finished
                             if message_json.get('is_finish', False):
                                 # If the message is complete, update the chat history
@@ -81,7 +85,6 @@ async def coze_chat(message: cl.Message):
                                     {"role": "assistant", "content": coze_message, "content_type": "text"})
                                 cl.user_session.set(
                                     'chat_history', chat_history)
-                                coze_message = ""  # Reset the accumulator for the next message
                         elif message_json.get('event') == 'done':
                             # If the 'done' event is received, break the loop
                             break
