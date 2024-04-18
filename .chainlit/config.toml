@@ -37,19 +37,19 @@ latex = true
 
 # Allows user to use speech to text
 [features.speech_to_text]
-    enabled = true
+    enabled = false
     # See all languages here https://github.com/JamesBrill/react-speech-recognition/blob/HEAD/docs/API.md#language-string
     # language = "en-US"
 
 [UI]
 # Name of the app and chatbot.
-name = "SLP-GPT AAC Mini"
+name = "SLP-GPT Pocket"
 
 # Show the readme while the thread is empty.
-show_readme_as_default = true
+show_readme_as_default = false
 
 # Description of the app and chatbot. This is used for HTML tags.
-description = "A free version of SLP-GPT's billing specialized component!"
+description = "A free version of SLP-GPT's specialized AAC and billing component!"
 
 # Large size content are by default collapsed for a cleaner ui
 default_collapse_content = true
