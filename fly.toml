@@ -1,9 +1,9 @@
-# fly.toml app configuration file generated for chainlit-coze-red-surf-1665 on 2024-04-17T01:21:21-07:00
+# fly.toml app configuration file generated for impossible on 2024-04-17T16:56:30-07:00
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
 
-app = 'chainlit-coze'
+app = 'impossible'
 primary_region = 'lax'
 
 [build]

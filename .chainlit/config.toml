@@ -30,7 +30,7 @@ latex = true
 
 # Authorize users to upload files with messages
 [features.multi_modal]
-    enabled = true
+    enabled = false
     accept = ["*/*"]
     max_files = 20
     max_size_mb = 500
@@ -81,7 +81,7 @@ hide_cot = true
 
 # Override default MUI light theme. (Check theme.ts)
 [UI.theme]
-    #font_family = "Inter, sans-serif"
+    font_family = "Barlow, sans-serif"
 [UI.theme.light]
     #background = "#FAFAFA"
     #paper = "#FFFFFF"
